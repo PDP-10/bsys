@@ -1,0 +1,149 @@
+read10xbsys.doc
+
+				READ10XBSYS
+
+
+NAME
+	read10xbsys - read a tape produced by the TENEX BSYS program
+
+SYNOPSIS
+	read10xbsys [-s] [-r] directory file.name
+
+	Use -r when you want the tape to automatically rewind at the end
+	of every retrieval.  Note that this greatly increases the time
+	when retrieving consecutive files.
+
+	If one argument is provided, it is assumed that it's the directory
+	name, and the program proceeds to recover all the files from that
+	directory.  
+
+DESCRIPTION
+	Read10xbsys reads tapes produced by the TENEX BSYS archival program, 
+	producing the directory listings and optionally extracting files.
+
+	
+TO PRODUCE A TAPE DIRECTORY LISTING
+	Run read10xbsys without any arguments.
+	The listing will be in the format:
+
+	<wiederhold>ucode.optimizer
+	<system>bsysdoc
+	etc.
+
+	The string in <> is the name of the directory in which the file
+	was in TENEX.  
+	
+	The program will stop when it reaches the end of the tape.
+
+TO RETRIEVE A FILE
+	The users have a file in their unix directories listing all the
+	files they archived on TENEX.  The file is named user.10xdir where
+	user stands for the name the user had on TENEX.
+	As an example of what the file looks  like, here is an excerpt from the
+	file wiederhold.10xdir:
+
+	SAVED.MESSAGES;8212	942	9-Jan-83	943	10-Jan-83
+	BIBLIO.COMBINED;2	939	4-Jan-83	940	4-Jan-83
+	UNIX.LOCKS;1		931	18-Dec-82	932	18-Dec-82
+	PRINT.FALL82;1		931	18-Dec-82	932	18-Dec-82
+
+	The users will most likely just send excerpts from this file when
+	requesting a file to be retrieved.  The pertinent information from
+	these excerpts is as follows:
+	The name of the TENEX directory (<WIEDERHOLD> in this example)
+	The name of the file (UNIX.LOCKS in this example)
+	The tape on which the file is located (931 or 932 in this example)
+
+	To retrieve the file <WIEDERHOLD>UNIX.LOCKS, first mount either
+	tape 931 or 932.
+	Then, run the program:
+		read10xbsys wiederhold unix.locks
+	where the name of the directory is the first argument, and the name
+	of the file the second argument.
+
+	Note that the names of files and directories will be capitalized in
+	the retrieval request, but to retrieve the file, you should not use
+	capital letters.
+
+	Also note that the directory of the tape will still be printed on
+	the screen up until and including the file to be extracted.
+
+	The retrieved file will be put in the directory you are currently in,
+	and will have the same name it had in TENEX except it will not be
+	in capital letters (unix.locks in this example).
+
+	If two files with the same name need to be retrieved, the second file
+	will overwrite the first file.  Therefore, the operator is advised
+	to rename the first file before running the second retrieval.
+
+	The read10xbsys program stops as soon as it has retrieved the requested
+	file, and does not rewind the tape.  Therefore, consecutive files
+	can be easily restored (see description below).
+
+	RETRIEVING FILES WITH NO EXTENSION/STRANGE CHARACTERS IN THE NAME
+	
+	Some files will not have an extension, ex: <WIEDERHOLD>FOO
+
+	To retrieve this file, run the program:
+		read10xbsys wiederhold foo
+	
+	If there is a unix-reserved character in the file name, such as !, 
+	use \ to retrieve the file.
+	
+	ex: <WIEDERHOLD>F!.32
+
+	would be retrieved with the command:
+		read10xbsys wiederhold f\!.32
+
+	RETRIEVING CONSECUTIVE FILES
+
+	In the file user.10xdir, the archived files are listed in the reverse
+	order in which they were archived.  Therefore, when there is a request
+	to retrieve more than one file from the same tape, here is a time-saving
+	procedure.  Simply retrieve the files in the reverse order than they
+	are listed in the user.10xdir file.  
+
+	Example:
+
+	The following two files are on the same tapes, and are listed in
+	the file wiederhold.10xdir in the following order:
+
+	UNIX.LOCKS;1		931	18-Dec-82	932	18-Dec-82
+	PRINT.FALL82;1		931	18-Dec-82	932	18-Dec-82
+
+	However, on the tape, the file print.fall82 comes before the file 
+	unix.locks.  Therefore, one should first retrieve print.fall82, 
+	and then the unix.locks file.
+
+	STOPPING/CONTINUING
+
+	If for some reason, the read10xbsys program is interrupted, and then
+	needs to be continued without rewinding the tape, it is imperative
+	to use the -s.
+
+	In other words, if a retrieval had been started with the command
+		read10xbsys foo bar.la
+	and then interrupted with ctrl-c, the retrieval should be continued
+	with the command
+		read10xbsys -s foo bar.la
+
+	It is not necessary to use the -s if the tape is rewound after the
+	interruption.
+
+	RETRIEVING ALL FILES FROM A DIRECTORY
+
+	To retrieve all files which belong to a certain user/directory,
+	just give one argument to the program: the name of the directory.
+	It will look through the whole tape for all such files, so it is
+	recommended that you use the -r flag for automatic rewinding of the
+	tape.
+
+	The files will get saved in the current directory.
+	Note the danger: if there are several files on the tape which all
+	have the same name, the file will keep being overwritten and in the
+	end, you will only have retrieved the last file on tape with that name.
+
+
+	REWINDING THE TAPE
+
+	The command echo < /dev/rmt8 will rewind the tape.
